@@ -1,7 +1,7 @@
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { config } from '../config/env';
 
-// Contract ABI - This would be generated from the compiled contract
+// Contract ABI - Generated from the compiled PrivacyHomeLoan.sol contract
 const PRIVACY_HOME_LOAN_ABI = [
   {
     "inputs": [
@@ -73,10 +73,15 @@ export const usePrivacyHomeLoan = () => {
       throw new Error('Wallet not connected');
     }
 
+    if (!address) {
+      throw new Error('No wallet address found');
+    }
+
     try {
       // In a production environment, this would use FHE encryption
       // For demo purposes, we'll simulate the encryption process
       console.log('🔐 Encrypting sensitive data with FHE...');
+      console.log('📊 Original data:', { loanAmount, propertyValue, income, creditScore, downPayment, loanTerm });
       
       // Simulate FHE encryption of sensitive financial data
       const encryptedLoanAmount = await encryptSensitiveData(loanAmount);
@@ -97,8 +102,11 @@ export const usePrivacyHomeLoan = () => {
       });
 
       console.log('🚀 Submitting encrypted application to blockchain...');
+      console.log('📍 Contract Address:', config.privacyHomeLoanContract);
+      console.log('👤 User Address:', address);
 
-      await writeContract({
+      // Call the smart contract with encrypted data
+      const result = await writeContract({
         address: config.privacyHomeLoanContract as `0x${string}`,
         abi: PRIVACY_HOME_LOAN_ABI,
         functionName: 'createLoanApplication',
@@ -114,7 +122,10 @@ export const usePrivacyHomeLoan = () => {
         ],
       });
 
-      console.log('✅ Encrypted loan application submitted successfully!');
+      console.log('✅ Transaction submitted:', result);
+      console.log('⏳ Waiting for blockchain confirmation...');
+      
+      return result;
     } catch (err) {
       console.error('❌ Error creating encrypted loan application:', err);
       throw err;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,20 @@ interface ApplyMortgagePageProps {
 
 export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
   const { toast } = useToast();
-  const { createLoanApplication, isPending, isConfirmed, error } = usePrivacyHomeLoan();
+  const { createLoanApplication, isPending, isConfirmed, error, hash } = usePrivacyHomeLoan();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+
+  // Monitor transaction confirmation
+  useEffect(() => {
+    if (isConfirmed) {
+      toast({
+        title: "✅ Application Confirmed on Blockchain",
+        description: "Your encrypted mortgage application has been successfully confirmed on the blockchain. Your data remains private throughout the process.",
+      });
+      onBack();
+    }
+  }, [isConfirmed, toast, onBack]);
   
   const [formData, setFormData] = useState({
     // Personal Information
@@ -94,7 +105,7 @@ export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
         description: "Your sensitive financial information is being encrypted with FHE before blockchain submission...",
       });
 
-      await createLoanApplication(
+      const txHash = await createLoanApplication(
         formData.propertyAddress,
         formData.loanAmount,
         formData.propertyValue,
@@ -104,12 +115,21 @@ export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
         formData.loanTerm || "30"
       );
 
-      toast({
-        title: "✅ Application Submitted Securely",
-        description: "Your mortgage application has been encrypted and submitted to the blockchain. Your data remains private throughout the process.",
-      });
-      
-      onBack();
+      if (txHash) {
+        toast({
+          title: "🚀 Transaction Submitted",
+          description: `Your encrypted application has been submitted to the blockchain. Transaction: ${txHash.slice(0, 10)}...`,
+        });
+
+        // Wait for confirmation
+        toast({
+          title: "⏳ Waiting for Confirmation",
+          description: "Your transaction is being processed on the blockchain. This may take a few minutes.",
+        });
+      }
+
+      // The transaction confirmation will be handled by the useContract hook
+      // We'll show a success message when isConfirmed becomes true
     } catch (err) {
       console.error('Error submitting application:', err);
       toast({
@@ -457,17 +477,22 @@ export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
               <Button 
                 onClick={submitApplication} 
                 className="bg-gradient-primary"
-                disabled={isPending}
+                disabled={isPending || isConfirmed}
               >
                 {isPending ? (
                   <>
                     <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Submitting...
+                    🔐 Encrypting & Submitting...
+                  </>
+                ) : isConfirmed ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    ✅ Confirmed on Blockchain
                   </>
                 ) : (
                   <>
                     <Check className="w-4 h-4 mr-2" />
-                    Submit Application
+                    Submit Encrypted Application
                   </>
                 )}
               </Button>

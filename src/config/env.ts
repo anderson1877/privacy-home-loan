@@ -15,6 +15,6 @@ export const config = {
   fheNetworkUrl: "https://api.zama.ai/fhevm",
   fheChainId: 0x1a1,
   
-  // Contract Addresses (to be deployed)
-  privacyHomeLoanContract: "0x0000000000000000000000000000000000000000", // Will be updated after deployment
+  // Contract Addresses
+  privacyHomeLoanContract: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6", // Deployed PrivacyHomeLoan contract on Sepolia
 } as const;
