@@ -25,11 +25,16 @@ This guide provides step-by-step instructions for deploying the Privacy Home Loa
 ### 3. Configure Project Settings
 
 #### Build Settings
-- **Framework Preset**: Vite
+- **Framework Preset**: Vite (or Other)
 - **Root Directory**: `./` (default)
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Install Command**: `npm install`
+- **Build Command**: `npm run build` (auto-detected)
+- **Output Directory**: `dist` (auto-detected)
+- **Install Command**: `npm install` (auto-detected)
+
+**Note**: Vercel should auto-detect Vite configuration. If not, manually set:
+- Framework: Other
+- Build Command: `npm run build`
+- Output Directory: `dist`
 
 #### Environment Variables
 Add the following environment variables in the Vercel dashboard:
@@ -100,6 +105,12 @@ After deploying your smart contract to Sepolia:
 - Check that all dependencies are properly installed
 - Verify TypeScript compilation
 - Check for missing environment variables
+- Ensure `vercel.json` is properly formatted (no trailing commas)
+
+#### Vercel Deployment Errors
+- **Function Runtime Error**: Remove any `functions` configuration from `vercel.json`
+- **Build Command Error**: Ensure Vite is properly configured
+- **Output Directory Error**: Verify `dist` directory is created after build
 
 #### Wallet Connection Issues
 - Verify WalletConnect Project ID is correct
