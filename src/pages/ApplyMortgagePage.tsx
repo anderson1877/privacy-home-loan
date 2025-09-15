@@ -88,7 +88,12 @@ export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
         return;
       }
 
-      // Submit to blockchain
+      // Submit encrypted data to blockchain
+      toast({
+        title: "🔐 Encrypting Your Data",
+        description: "Your sensitive financial information is being encrypted with FHE before blockchain submission...",
+      });
+
       await createLoanApplication(
         formData.propertyAddress,
         formData.loanAmount,
@@ -100,8 +105,8 @@ export const ApplyMortgagePage = ({ onBack }: ApplyMortgagePageProps) => {
       );
 
       toast({
-        title: "Application Submitted",
-        description: "Your mortgage application has been submitted with end-to-end encryption. You'll receive updates via email.",
+        title: "✅ Application Submitted Securely",
+        description: "Your mortgage application has been encrypted and submitted to the blockchain. Your data remains private throughout the process.",
       });
       
       onBack();

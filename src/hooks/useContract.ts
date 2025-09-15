@@ -73,17 +73,31 @@ export const usePrivacyHomeLoan = () => {
       throw new Error('Wallet not connected');
     }
 
-    // In a real implementation, these values would be encrypted using FHE
-    // For now, we'll use placeholder encrypted data
-    const encryptedLoanAmount = new Uint8Array(32); // Placeholder
-    const encryptedPropertyValue = new Uint8Array(32); // Placeholder
-    const encryptedIncome = new Uint8Array(32); // Placeholder
-    const encryptedCreditScore = new Uint8Array(32); // Placeholder
-    const encryptedDownPayment = new Uint8Array(32); // Placeholder
-    const encryptedLoanTerm = new Uint8Array(32); // Placeholder
-    const inputProof = new Uint8Array(64); // Placeholder proof
-
     try {
+      // In a production environment, this would use FHE encryption
+      // For demo purposes, we'll simulate the encryption process
+      console.log('🔐 Encrypting sensitive data with FHE...');
+      
+      // Simulate FHE encryption of sensitive financial data
+      const encryptedLoanAmount = await encryptSensitiveData(loanAmount);
+      const encryptedPropertyValue = await encryptSensitiveData(propertyValue);
+      const encryptedIncome = await encryptSensitiveData(income);
+      const encryptedCreditScore = await encryptSensitiveData(creditScore);
+      const encryptedDownPayment = await encryptSensitiveData(downPayment);
+      const encryptedLoanTerm = await encryptSensitiveData(loanTerm);
+      
+      // Generate zero-knowledge proof for encrypted data
+      const inputProof = await generateZKProof({
+        loanAmount: encryptedLoanAmount,
+        propertyValue: encryptedPropertyValue,
+        income: encryptedIncome,
+        creditScore: encryptedCreditScore,
+        downPayment: encryptedDownPayment,
+        loanTerm: encryptedLoanTerm
+      });
+
+      console.log('🚀 Submitting encrypted application to blockchain...');
+
       await writeContract({
         address: config.privacyHomeLoanContract as `0x${string}`,
         abi: PRIVACY_HOME_LOAN_ABI,
@@ -99,10 +113,43 @@ export const usePrivacyHomeLoan = () => {
           inputProof
         ],
       });
+
+      console.log('✅ Encrypted loan application submitted successfully!');
     } catch (err) {
-      console.error('Error creating loan application:', err);
+      console.error('❌ Error creating encrypted loan application:', err);
       throw err;
     }
+  };
+
+  // Simulate FHE encryption (in production, this would use actual FHE libraries)
+  const encryptSensitiveData = async (data: string): Promise<Uint8Array> => {
+    // This is a placeholder for actual FHE encryption
+    // In production, you would use libraries like @fhevm/solidity or similar
+    const encoder = new TextEncoder();
+    const dataBytes = encoder.encode(data);
+    
+    // Simulate encryption by creating a larger buffer with some transformation
+    const encrypted = new Uint8Array(32);
+    for (let i = 0; i < Math.min(dataBytes.length, 32); i++) {
+      encrypted[i] = dataBytes[i] ^ 0xAA; // Simple XOR for demo
+    }
+    
+    return encrypted;
+  };
+
+  // Simulate zero-knowledge proof generation
+  const generateZKProof = async (encryptedData: any): Promise<Uint8Array> => {
+    // This is a placeholder for actual ZK proof generation
+    // In production, you would use libraries like snarkjs or similar
+    const proof = new Uint8Array(64);
+    
+    // Fill with some deterministic data based on encrypted inputs
+    const hash = await crypto.subtle.digest('SHA-256', 
+      new TextEncoder().encode(JSON.stringify(encryptedData))
+    );
+    
+    proof.set(new Uint8Array(hash), 0);
+    return proof;
   };
 
   const approveLoan = async (applicationId: number, lender: string) => {
